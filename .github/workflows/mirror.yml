@@ -1,0 +1,30 @@
+name: Hard reset main to upstream
+
+on:
+  schedule:
+    - cron: "0 */8 * * *"   # every 8 hours
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout automation branch
+        uses: actions/checkout@v4
+        with:
+          ref: automation
+          fetch-depth: 0
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/vanallenlab/pnet-simulation.git
+          git fetch upstream --prune
+
+      - name: Reset main to upstream/main
+        run: |
+          git checkout main || git checkout -b main
+          git reset --hard upstream/main
+
+      - name: Push hard reset
+        run: |
+          git push origin main --force
